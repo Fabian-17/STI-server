@@ -7,6 +7,7 @@ import {getAllUsers,
  } from '../services/userServices.js';
 import { createJWT } from '../utils/jsonwebtoken.js';
 import jwt from 'jsonwebtoken';
+import { authenticateUser } from '../middleware/authMiddleware.js';
 
 
 export const ctrlGetAllUsers = async (_req, res) => {
@@ -90,13 +91,11 @@ export const ctrlLoginUser = async (req, res) => {
     }
 };
 
+// Antes de cada controlador que requiera autenticación, utilizamos el middleware de autenticación
 export const ctrlGetUserByToken = async (req, res) => {
     try {
-        const token = req.headers.authorization;
-        if (!token) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        const { user: userId } = jwt.verify(token, process.env.SECRET_KEY);
+        // Aquí podemos acceder al ID del usuario desde req.userId gracias al middleware de autenticación
+        const userId = req.userId;
         const user = await getUserById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
